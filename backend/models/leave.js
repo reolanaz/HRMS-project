@@ -8,7 +8,7 @@ const leaveSchema = new mongoose.Schema({
   },
   leaveType: {
     type: String,
-    enum: ["Sick Leave", "Casual Leave", "Annual Leave"],
+    enum: ["Sick", "Casual", "Annual"],
     required: true
   },
   startDate: {
@@ -21,7 +21,8 @@ const leaveSchema = new mongoose.Schema({
   },
   reason: {
     type: String,
-    required: true
+    required: true,
+    minlength: [10, "Reason must be at least 10 characters"]
   },
   days: {
     type: Number,
@@ -36,8 +37,6 @@ const leaveSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
 export default mongoose.model("Leave", leaveSchema);

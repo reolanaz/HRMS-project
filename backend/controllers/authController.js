@@ -7,9 +7,12 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    console.log("📌 REGISTER REQUEST:", { name, email });
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
+      console.log("❌ User already exists");
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -24,6 +27,8 @@ export const registerUser = async (req, res) => {
       role: "employee",
     });
 
+    console.log("✅ User registered:", user.email);
+
     res.status(201).json({
       message: "User registered successfully",
       user: {
@@ -35,26 +40,36 @@ export const registerUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    console.log("❌ REGISTER ERROR:", error.message);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 // ===== LOGIN USER =====
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log("\n🔐 LOGIN ATTEMPT");
+    console.log("👉 EMAIL ENTERED:", email);
+
     // Check if user exists
     const user = await User.findOne({ email });
+
+    console.log("👉 USER FOUND:", user ? "YES" : "NO");
+
     if (!user) {
-      return res.status(400).json({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "User not found" });
     }
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
+
+    console.log("👉 PASSWORD MATCH:", isMatch);
+
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Wrong password" });
     }
 
     // Create JWT Token
@@ -63,6 +78,8 @@ export const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+
+    console.log("✅ LOGIN SUCCESS:", email);
 
     res.json({
       message: "Login successful",
@@ -76,7 +93,7 @@ export const loginUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    console.log("❌ LOGIN ERROR:", error.message);
     res.status(500).json({ message: "Server Error" });
   }
 };

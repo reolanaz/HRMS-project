@@ -16,7 +16,7 @@ const DepartmentList = () => {
       const res = await axios.get("http://localhost:5000/api/departments", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setDepartments(res.data);
+      setDepartments(res.data.departments || []);
     } catch (error) {
       console.error("Error fetching departments:", error);
     }

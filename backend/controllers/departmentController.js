@@ -1,10 +1,11 @@
 import Department from "../models/department.js";
 
 // Get all departments
+// Get all departments
 export const getDepartments = async (req, res) => {
   try {
     const departments = await Department.find().sort({ createdAt: -1 });
-    res.json(departments);
+    res.json({ success: true, departments });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }

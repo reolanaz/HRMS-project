@@ -1,42 +1,77 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "./pages/LandingPage.jsx";
-import Login from "./pages/Login.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import EmployeeDashboard from "./pages/EmployeeDashboard.jsx";
-import Unauthorized from "./pages/unauthorized.jsx";
-import PrivateRoutes from "./components/privateRoutes.jsx";
-import AdminSummary from "./components/adminSummary.jsx";
-import DepartmentList from "./components/departmentList.jsx";
-import EmployeeList from "./components/employeeList.jsx";
-import LeaveList from "./components/leaveList.jsx";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+// Pages
+import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
+import EmployeeDashboard from './pages/EmployeeDashboard';
+import LandingPage from './pages/LandingPage';
+import Unauthorized from './pages/Unauthorized';
+
+// Auth
+import PrivateRoutes from './components/PrivateRoutes';
+
+// Admin Components
+import AdminSummary from './components/AdminSummary';
+import DepartmentList from './components/DepartmentList';
+import EmployeeList from './components/EmployeeList';
+import LeaveList from './components/LeaveList';
+import SalaryManagement from './components/SalaryManagement';
+import Settings from './components/Settings';
+import PaySlip from './components/PaySlip';
+
+// Employee Components
+import EmployeeSummary from './components/EmployeeSummary';
+import ApplyLeave from './components/ApplyLeave';
+import EmployeeLeaveHistory from './components/EmployeeLeaveHistory';
+import EmployeeProfile from './components/EmployeeProfile';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Public routes */}
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Admin only routes */}
-        <Route element={<PrivateRoutes allowedRole="admin" />}>
-          <Route path="/admin-dashboard" element={<AdminDashboard />}>
-            <Route index element={<AdminSummary />} />
-            <Route path="employees" element={<EmployeeList />} /> {/* ✅ FIXED */}
-            <Route path="departments" element={<DepartmentList />} />
-            <Route path="leaves" element={<LeaveList />} />
-            <Route path="salary" element={<div className="text-gray-500">Salary page coming soon</div>} />
-            <Route path="settings" element={<div className="text-gray-500">Settings page coming soon</div>} />
-          </Route>
+        {/* Admin Routes */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <PrivateRoutes allowedRoles={['admin']}>
+              <AdminDashboard />
+            </PrivateRoutes>
+          }
+        >
+          <Route index element={<AdminSummary />} />
+          <Route path="employees" element={<EmployeeList />} />
+          <Route path="departments" element={<DepartmentList />} />
+          <Route path="leaves" element={<LeaveList />} />
+          <Route path="salary" element={<SalaryManagement />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
-        {/* Employee only routes */}
-        <Route element={<PrivateRoutes allowedRole="employee" />}>
-          <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+        {/* Employee Routes */}
+        <Route
+          path="/employee-dashboard"
+          element={
+            <PrivateRoutes allowedRoles={['employee']}>
+              <EmployeeDashboard />
+            </PrivateRoutes>
+          }
+        >
+          <Route index element={<EmployeeSummary />} />
+          <Route path="apply-leave" element={<ApplyLeave />} />
+          <Route path="leaves" element={<EmployeeLeaveHistory />} />
+          <Route path="profile" element={<EmployeeProfile />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="payslip" element={<PaySlip />} />
         </Route>
-        
+
+        {/* Catch All */}
+        <Route path="*" element={<Navigate to="/login" />} />
+
       </Routes>
     </BrowserRouter>
   );

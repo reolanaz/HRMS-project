@@ -1,5 +1,5 @@
 import Leave from "../models/leave.js";
-import Employee from "../models/Employee.js";
+import Employee from "../models/employee.js";
 
 // Get all leaves (Admin)
 export const getLeaves = async (req, res) => {

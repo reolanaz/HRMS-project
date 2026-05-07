@@ -1,15 +1,26 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ persists user on page refresh
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    
+    if (storedUser && token) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        localStorage.clear();
+      }
+    }
+    setLoading(false);
+  }, []);
 
   const login = async (email, password) => {
     try {
@@ -40,6 +51,21 @@ export const AuthProvider = ({ children }) => {
     localStorage.clear();
     setUser(null);
   };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

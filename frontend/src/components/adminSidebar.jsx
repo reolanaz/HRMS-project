@@ -19,7 +19,7 @@ const navLinks = [
   { path: "/admin-dashboard/settings",    icon: <MdSettings size={20} />,    label: "Settings"    },
 ];
 
-const adminSidebar = () => {
+const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -29,11 +29,10 @@ const adminSidebar = () => {
   };
 
   return (
-   <div className="flex flex-col w-64 min-h-screen bg-[#0C2B4E] text-white">
-
+    <div className="flex flex-col w-64 min-h-screen bg-[#005461] text-white fixed left-0 top-0">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-white/10">
-        <h1 className="text-xl font-bold tracking-wide text-teal-400">
+        <h1 className="text-xl font-bold tracking-wide text-white">
           Employee MS
         </h1>
       </div>
@@ -49,7 +48,7 @@ const adminSidebar = () => {
               `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-teal-500 text-white"
-                  : "text-gray-400 hover:bg-white/10 hover:text-white"
+                  : "text-gray-300 hover:bg-white/10 hover:text-white"
               }`
             }
           >
@@ -63,15 +62,14 @@ const adminSidebar = () => {
       <div className="px-3 py-4 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-all duration-200"
+          className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-red-500/20 hover:text-red-400 transition-all duration-200"
         >
           <MdLogout size={20} />
           Logout
         </button>
       </div>
-
     </div>
   );
 };
 
-export default adminSidebar;
+export default AdminSidebar;

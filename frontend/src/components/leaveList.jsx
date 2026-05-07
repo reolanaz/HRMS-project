@@ -13,7 +13,7 @@ const LeaveList = () => {
       const res = await axios.get("http://localhost:5000/api/leaves", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setLeaves(res.data);
+      setLeaves(res.data.leaves || []);
     } catch (error) {
       console.error("Error fetching leaves:", error);
     }

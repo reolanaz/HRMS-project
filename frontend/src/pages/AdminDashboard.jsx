@@ -1,25 +1,16 @@
-import { Outlet } from "react-router-dom";
-import AdminSidebar from "../components/adminSidebar";
-import AdminNavbar from "../components/adminNavbar";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import AdminSidebar from '../components/adminSidebar';
+import AdminNavbar from '../components/adminNavbar';
 
 const AdminDashboard = () => {
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-
-      {/* Sidebar */}
+    <div className="flex">
       <AdminSidebar />
-
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-
-        {/* Navbar */}
+      
+      <div className="flex-1 ml-64 bg-gray-100 min-h-screen">
         <AdminNavbar />
-
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <Outlet />
-        </main>
-
+        <Outlet />
       </div>
     </div>
   );

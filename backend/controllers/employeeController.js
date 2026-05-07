@@ -6,11 +6,11 @@ import bcrypt from "bcryptjs";
 export const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find()
-      .populate("userId", "name email")
+      .populate("userId", "name email role")
       .populate("department", "name")
       .sort({ createdAt: -1 });
     
-    res.json(employees);
+    res.json({ success: true, employees });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
@@ -33,16 +33,13 @@ export const addEmployee = async (req, res) => {
       role = "employee"
     } = req.body;
 
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user first
     const newUser = await User.create({
       name,
       email,
@@ -50,7 +47,6 @@ export const addEmployee = async (req, res) => {
       role
     });
 
-    // Create employee
     const newEmployee = await Employee.create({
       userId: newUser._id,
       employeeId,
@@ -62,7 +58,11 @@ export const addEmployee = async (req, res) => {
       salary
     });
 
-    res.status(201).json({ message: "Employee created successfully" });
+    res.status(201).json({ 
+      success: true,
+      message: "Employee created successfully",
+      employee: newEmployee
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });
@@ -75,14 +75,14 @@ export const getEmployee = async (req, res) => {
     const { id } = req.params;
     
     const employee = await Employee.findById(id)
-      .populate("userId", "name email")
+      .populate("userId", "name email role")
       .populate("department", "name");
 
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    res.json(employee);
+    res.json({ success: true, employee });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
@@ -109,10 +109,8 @@ export const updateEmployee = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    // Update user info
     await User.findByIdAndUpdate(employee.userId, { name, email });
 
-    // Update employee info
     await Employee.findByIdAndUpdate(id, {
       employeeId,
       dob,
@@ -123,7 +121,7 @@ export const updateEmployee = async (req, res) => {
       salary
     });
 
-    res.json({ message: "Employee updated successfully" });
+    res.json({ success: true, message: "Employee updated successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
@@ -139,13 +137,10 @@ export const deleteEmployee = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    // Delete user
     await User.findByIdAndDelete(employee.userId);
-    
-    // Delete employee
     await Employee.findByIdAndDelete(id);
 
-    res.json({ message: "Employee deleted successfully" });
+    res.json({ success: true, message: "Employee deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }

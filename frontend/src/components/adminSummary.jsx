@@ -4,10 +4,8 @@ import { MdPeople, MdApartment, MdAttachMoney, MdEventNote, MdCheckCircle, MdHou
 
 const StatCard = ({ icon, label, value, gradient, iconBg }) => (
   <div className={`relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br ${gradient} shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group`}>
-    {/* Decorative circles */}
     <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
     <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
-    
     <div className="relative flex items-start justify-between">
       <div className="flex-1">
         <p className="text-white/80 text-sm font-medium mb-2 tracking-wide uppercase">{label}</p>
@@ -24,33 +22,54 @@ const AdminSummary = () => {
   const [stats, setStats] = useState({
     totalEmployees: 0,
     totalDepartments: 0,
-    totalSalary: 0
+    totalSalary: 0,
+    avgSalary: 0,
+    totalLeaves: 0,
+    approvedLeaves: 0,
+    pendingLeaves: 0,
+    rejectedLeaves: 0
   });
 
-  // Fetch dashboard stats
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        
-        // Fetch employees
+
         const empRes = await axios.get("http://localhost:5000/api/employees", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
-        // Fetch departments
+
         const deptRes = await axios.get("http://localhost:5000/api/departments", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Calculate total salary
-        const totalSalary = empRes.data.reduce((sum, emp) => sum + (emp.salary || 0), 0);
+        const leaveRes = await axios.get("http://localhost:5000/api/leaves", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const employees = empRes.data.employees || [];
+        const departments = deptRes.data.departments || deptRes.data || [];
+        const leaves = leaveRes.data.leaves || [];
+
+        const totalSalary = employees.reduce(
+          (sum, emp) => sum + (emp.salary || 0), 0
+        );
+
+        const avgSalary = employees.length > 0
+          ? Math.round(totalSalary / employees.length)
+          : 0;
 
         setStats({
-          totalEmployees: empRes.data.length,
-          totalDepartments: deptRes.data.length,
-          totalSalary: totalSalary
+          totalEmployees: employees.length,
+          totalDepartments: departments.length,
+          totalSalary,
+          avgSalary,
+          totalLeaves: leaves.length,
+          approvedLeaves: leaves.filter(l => l.status === "Approved").length,
+          pendingLeaves: leaves.filter(l => l.status === "Pending").length,
+          rejectedLeaves: leaves.filter(l => l.status === "Rejected").length
         });
+
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
@@ -61,7 +80,7 @@ const AdminSummary = () => {
 
   return (
     <div className="space-y-8">
-      
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -74,8 +93,8 @@ const AdminSummary = () => {
         </div>
       </div>
 
-      {/* Top Stats - Modern gradient cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Top Stats - 4 cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           icon={<MdPeople size={32} className="text-white" />}
           label="Total Employees"
@@ -92,10 +111,17 @@ const AdminSummary = () => {
         />
         <StatCard
           icon={<MdAttachMoney size={32} className="text-white" />}
-          label="Monthly Pay"
-          value={`$${stats.totalSalary.toLocaleString()}`}
+          label="Monthly Payroll"
+          value={`₹${stats.totalSalary.toLocaleString()}`}
           gradient="from-emerald-500 via-emerald-600 to-emerald-700"
           iconBg="bg-emerald-400/30"
+        />
+        <StatCard
+          icon={<MdAttachMoney size={32} className="text-white" />}
+          label="Average Salary"
+          value={`₹${stats.avgSalary.toLocaleString()}`}
+          gradient="from-orange-500 via-orange-600 to-orange-700"
+          iconBg="bg-orange-400/30"
         />
       </div>
 
@@ -105,10 +131,9 @@ const AdminSummary = () => {
           <div className="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
           <h3 className="text-2xl font-bold text-gray-900">Leave Management</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          
-          {/* Leave Applied */}
+
           <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-5 border border-cyan-200 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-cyan-500 p-3 rounded-lg">
@@ -117,10 +142,9 @@ const AdminSummary = () => {
               <span className="text-xs font-semibold text-cyan-600 bg-cyan-200 px-2 py-1 rounded-full">ALL</span>
             </div>
             <p className="text-sm font-medium text-cyan-700 mb-1">Leave Applied</p>
-            <p className="text-3xl font-bold text-cyan-900">0</p>
+            <p className="text-3xl font-bold text-cyan-900">{stats.totalLeaves}</p>
           </div>
 
-          {/* Leave Approved */}
           <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-green-500 p-3 rounded-lg">
@@ -129,10 +153,9 @@ const AdminSummary = () => {
               <span className="text-xs font-semibold text-green-600 bg-green-200 px-2 py-1 rounded-full">APPROVED</span>
             </div>
             <p className="text-sm font-medium text-green-700 mb-1">Leave Approved</p>
-            <p className="text-3xl font-bold text-green-900">0</p>
+            <p className="text-3xl font-bold text-green-900">{stats.approvedLeaves}</p>
           </div>
 
-          {/* Leave Pending */}
           <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border border-amber-200 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-amber-500 p-3 rounded-lg">
@@ -141,10 +164,9 @@ const AdminSummary = () => {
               <span className="text-xs font-semibold text-amber-600 bg-amber-200 px-2 py-1 rounded-full">PENDING</span>
             </div>
             <p className="text-sm font-medium text-amber-700 mb-1">Leave Pending</p>
-            <p className="text-3xl font-bold text-amber-900">0</p>
+            <p className="text-3xl font-bold text-amber-900">{stats.pendingLeaves}</p>
           </div>
 
-          {/* Leave Rejected */}
           <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl p-5 border border-rose-200 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-rose-500 p-3 rounded-lg">
@@ -153,7 +175,7 @@ const AdminSummary = () => {
               <span className="text-xs font-semibold text-rose-600 bg-rose-200 px-2 py-1 rounded-full">REJECTED</span>
             </div>
             <p className="text-sm font-medium text-rose-700 mb-1">Leave Rejected</p>
-            <p className="text-3xl font-bold text-rose-900">0</p>
+            <p className="text-3xl font-bold text-rose-900">{stats.rejectedLeaves}</p>
           </div>
 
         </div>
